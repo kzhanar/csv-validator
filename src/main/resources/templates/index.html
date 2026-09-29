@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CSV Validator</title>
+</head>
+<body>
+<main>
+    <h1>CSV Validator</h1>
+    <form th:action="@{/validate}" method="post" enctype="multipart/form-data">
+        <label for="file">CSV file</label>
+        <input id="file" name="file" type="file" accept=".csv">
+        <button type="submit">Submit</button>
+    </form>
+
+    <p th:if="${fileError}" th:text="${fileError}" role="alert"></p>
+    <section th:if="${totalRows != null}">
+        <h2>Validation Report</h2>
+        <p th:text="'Total rows: ' + ${totalRows}"></p>
+        <p th:text="'Valid rows: ' + ${validRows}"></p>
+        <p th:text="'Invalid rows: ' + ${invalidRows}"></p>
+
+        <h3 th:if="${validationRowErrors != null and !#lists.isEmpty(validationRowErrors)}">Row Errors</h3>
+        <ul>
+            <li th:each="rowError : ${validationRowErrors}"
+                th:text="'Row ' + ${rowError.rowNumber} + ': ' + ${#strings.listJoin(rowError.reasons, '; ')}"></li>
+        </ul>
+    </section>
+    <p th:if="${successMessage}" th:text="${successMessage}" role="status"></p>
+</main>
+</body>
+</html>
