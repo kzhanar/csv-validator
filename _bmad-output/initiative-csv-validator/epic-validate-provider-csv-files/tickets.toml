@@ -1,0 +1,58 @@
+# Ordered story breakdown for epic-validate-provider-csv-files.
+
+[[entry]]
+id = 1
+type = "story"
+title = "Establish upload-to-report tracer path"
+description = "Verify the thinnest path from a supported CSV upload through parsing to a rendered validation report, including the valid-file outcome."
+verify = "mvn test -Dtest=CsvValidationControllerTest#acceptsNonEmptyCsvWithoutRelyingOnBrowserContentType"
+covers = ["CAP-1", "CAP-5"]
+after = []
+hitl = false
+risk = "medium"
+
+[[entry]]
+id = 2
+type = "story"
+title = "Validate CSV structure and required values"
+description = "Verify missing required headers and missing provider values are rejected and reported without producing a misleading row report."
+verify = "mvn test -Dtest=CsvStructureValidationServiceTest,CsvRequiredValueValidationServiceTest,CsvValidationControllerTest#rejectsCsvWithMissingRequiredHeaders"
+covers = ["CAP-2"]
+after = [1]
+hitl = false
+risk = "low"
+
+[[entry]]
+id = 3
+type = "story"
+title = "Validate effective dates"
+description = "Verify effective_date values follow the agreed date policy and invalid dates identify the affected data rows."
+verify = "mvn test -Dtest=CsvDateValidationServiceTest,CsvValidationReportServiceTest"
+covers = ["CAP-3"]
+after = [2]
+hitl = false
+risk = "low"
+unknown = "The current code uses strict YYYY-MM-DD parsing; confirm this is the intended policy when the story is built."
+
+[[entry]]
+id = 4
+type = "story"
+title = "Detect duplicate provider IDs"
+description = "Verify provider_id uniqueness within one file and preserve duplicate errors alongside other row-level validation reasons."
+verify = "mvn test -Dtest=CsvDuplicateProviderIdValidationServiceTest,CsvValidationReportServiceTest"
+covers = ["CAP-4"]
+after = [3]
+hitl = false
+risk = "low"
+
+[[entry]]
+id = 5
+type = "story"
+title = "Run integrated verification and refactor sweep"
+description = "Verify the complete validation report, transient processing constraint, and agreed malformed-input behavior, then clean up only issues found by the preceding stories."
+verify = "mvn test"
+covers = ["CAP-1", "CAP-2", "CAP-3", "CAP-4", "CAP-5"]
+after = [1, 2, 3, 4]
+hitl = false
+risk = "medium"
+unknown = "Agree behavior for malformed CSV syntax, unsupported encodings, empty files, and extra columns before finalizing the sweep."

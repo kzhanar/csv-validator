@@ -26,7 +26,7 @@ public class CsvRequiredValueValidationService {
             int rowNumber = 1;
             for (CSVRecord record : parser) {
                 List<String> missingFields = REQUIRED_HEADERS.stream()
-                        .filter(header -> isBlank(record.get(header)))
+                    .filter(header -> !record.isSet(header) || isBlank(record.get(header)))
                         .toList();
 
                 if (!missingFields.isEmpty()) {

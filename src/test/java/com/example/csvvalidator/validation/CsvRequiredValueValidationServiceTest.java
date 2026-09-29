@@ -39,6 +39,18 @@ class CsvRequiredValueValidationServiceTest {
         assertTrue(errors.isEmpty());
     }
 
+    @Test
+    void missingTrailingValuesAreReportedAsMissing() throws Exception {
+        List<RowMissingFieldError> errors = findErrors("""
+                provider_id,provider_name,effective_date
+                P-100,North Clinic
+                """);
+
+        assertEquals(1, errors.size());
+        assertEquals(1, errors.get(0).rowNumber());
+        assertEquals(List.of("effective_date"), errors.get(0).missingFields());
+    }
+
     private List<RowMissingFieldError> findErrors(String csv) throws Exception {
         return service.findMissingRequiredValues(new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8)));
     }
