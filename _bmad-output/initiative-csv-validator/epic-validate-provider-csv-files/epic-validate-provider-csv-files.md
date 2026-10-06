@@ -51,4 +51,4 @@ This epic owns the web upload flow, CSV parsing, validation services, report agg
 - Decision: use one epic because all capabilities belong to one validation workflow and share the same implementation boundary.
 - Decision: treat the existing implementation as verification and hardening work rather than assuming greenfield implementation.
 - Observed current behavior: effective_date uses strict YYYY-MM-DD parsing; row numbers are 1-based for data rows; multiple errors are aggregated per row.
-- Open question: malformed CSV syntax, unsupported encodings, empty files, and extra-column behavior need explicit verification or a recorded decision during the closing sweep.
+- Decision: CSV input policies are settled in the canonical spec; verify the approved size, filename/content, malformed/empty, invalid-UTF-8, blank-line, and delimiter-only cases from the initiative test catalog during the closing sweep.

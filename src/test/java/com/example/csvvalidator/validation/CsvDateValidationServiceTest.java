@@ -30,11 +30,13 @@ class CsvDateValidationServiceTest {
                 provider_id,provider_name,effective_date
                 P-100,North Clinic,2025/01/31
                 P-101,South Clinic,2025-2-03
+                P-102,East Clinic,2025-01-02T00:00:00
                 """);
 
-        assertEquals(2, errors.size());
+            assertEquals(3, errors.size());
         assertEquals(1, errors.get(0).rowNumber());
         assertEquals(2, errors.get(1).rowNumber());
+            assertEquals(3, errors.get(2).rowNumber());
     }
 
     @Test

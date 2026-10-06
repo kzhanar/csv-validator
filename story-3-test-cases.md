@@ -224,6 +224,6 @@ provider_id,provider_name,effective_date
 
 **Manual or automated:** Automated (JUnit 5)
 
-## Pending Cases
+## Full-Suite Reference
 
-The architecture lists malformed CSV syntax and an entirely empty file as open decisions. Their expected user-visible behavior is not defined, so executable expected results should be added after those decisions are approved. The blank data-record behavior is also not specified by US-3 and is not asserted here.
+The approved upload-size, file-type, empty/malformed-input, validation, report, and transient-data cases are cataloged in [_bmad-output/initiative-csv-validator/test-cases-csv-validator.md](_bmad-output/initiative-csv-validator/test-cases-csv-validator.md). The traceability table there maps TC3-01 through TC3-11 to the canonical capabilities and functional requirements.

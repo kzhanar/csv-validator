@@ -72,6 +72,10 @@ Uploaded file contents are used only to produce the validation result and are no
 5. Given a file missing one or more required headers, when the user validates it, then validation fails with the missing header names and no row-level results are shown.
 6. Given a non-CSV file, when the user selects it for validation, then the application rejects it with a clear message.
 7. Given any completed row-level validation, then the displayed total equals the number of data rows and equals valid rows plus invalid rows.
+8. Given a CSV upload of at most 1 MiB, when it is submitted, then it may proceed to validation; given a larger file, then a clear file-level size error is shown.
+9. Given a filename without a case-insensitive `.csv` extension, when submitted, then it is rejected even if its content or browser MIME type claims CSV; a `.csv` file is validated from its content server-side.
+10. Given a zero-byte or whitespace-only file, when submitted, then it receives a clear file-level empty-file error; given a header-only file, then the report shows zero data rows. Completely blank physical lines are ignored, while delimiter-only records count as data rows.
+11. Given malformed CSV syntax or invalid UTF-8, when submitted, then a clear file-level error is shown and no partial row report is returned.
 
 ## Constraints and Assumptions
 

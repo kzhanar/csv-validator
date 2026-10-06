@@ -32,7 +32,6 @@ covers = ["CAP-3"]
 after = [2]
 hitl = false
 risk = "low"
-unknown = "The current code uses strict YYYY-MM-DD parsing; confirm this is the intended policy when the story is built."
 
 [[entry]]
 id = 4
@@ -55,4 +54,3 @@ covers = ["CAP-1", "CAP-2", "CAP-3", "CAP-4", "CAP-5"]
 after = [1, 2, 3, 4]
 hitl = false
 risk = "medium"
-unknown = "Agree behavior for malformed CSV syntax, unsupported encodings, empty files, and extra columns before finalizing the sweep."

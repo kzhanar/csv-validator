@@ -26,6 +26,9 @@ As a user, I want to submit one CSV file so that the application can validate it
 - Given I submit without a file, when the request is handled, then the page shows a clear file-level error.
 - Given I select a file that is not a CSV, when I submit it, then the page shows a clear unsupported-file error instead of a validation report.
 - File-type rejection is enforced server-side and does not rely only on a browser-provided content type.
+- A filename must have a case-insensitive `.csv` extension, and the server validates file content rather than trusting the browser MIME type.
+- A file up to and including 1 MiB may proceed; a larger file receives a clear file-level size error.
+- A zero-byte or whitespace-only file receives a clear file-level empty-file error.
 
 ## Epic 2: Validate provider data
 
@@ -41,6 +44,8 @@ As a user, I want the application to verify the required columns so that a struc
 - Given all exact, case-sensitive required headers are present, when the file is checked, then row validation can proceed.
 - Given one or more required headers are missing, when the file is checked, then the result identifies every missing header and no row-level results are produced.
 - Given additional columns are present, when the file is checked, then they are ignored and do not cause failure.
+- Given CSV syntax is malformed or the bytes are not valid UTF-8, when the file is parsed, then validation fails at file level and produces no partial row results.
+- Completely blank physical lines are ignored; a delimiter-only record is retained as a data row for required-value validation.
 
 ### US-4: Find missing required values
 
@@ -87,6 +92,8 @@ As a user, I want a summary of valid and invalid rows with row-specific reasons 
 - A row with one or more errors counts as invalid once.
 - Total rows equal valid rows plus invalid rows.
 - When all rows are valid, the report shows zero invalid rows and no row errors.
+- Given a header-only CSV, when validation completes, then the report shows zero total, valid, and invalid data rows with no row errors.
+- Completely blank physical lines do not count as data rows; delimiter-only records do count and are invalid for missing required values.
 
 ### US-8: View the validation report
 
@@ -114,10 +121,3 @@ As a user, I want my uploaded data used only for validation so that it is not re
 - CSV row values and file contents are not written to application logs.
 - Automated tests exercise validation using in-memory or request-scoped input without a database.
 
-## Open Decisions Before Implementation
-
-These are listed in the architecture but are not specified by the approved product requirements; resolve them before implementation:
-
-- Maximum accepted upload size.
-- User-visible handling of malformed CSV syntax, an empty file, and blank data records.
-- Whether file type is determined by the filename, parsed content, or both.
