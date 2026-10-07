@@ -1,6 +1,6 @@
-# CSV Validator — BMAD Learning Project
+# CSV Validator - Methodology Learning Project
 
-A small Java application for learning **AI-assisted software development using the BMAD Method**.
+A small Java application for learning **AI-assisted software development using the BMAD, Superpowers, Openspec Methods**.
 
 The application validates CSV files containing provider data and reports invalid or duplicate records.
 
@@ -15,7 +15,7 @@ The primary purpose of this repository is to practice a structured AI-assisted d
 This project has two goals:
 
 1. Build a simple CSV validation application.
-2. Learn how to use BMAD with AI coding agents in VS Code.
+2. Learn how to use BMAD, Superpowers, Openspec with AI coding agents in VS Code.
 
 Rather than asking an AI agent to build the entire application from one prompt, the project uses structured artifacts to guide development and testing.
 
