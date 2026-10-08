@@ -59,6 +59,7 @@ public class CsvValidationController {
             model.addAttribute("invalidRows", report.invalidRows());
             model.addAttribute("validationRowErrors", report.rowErrors());
             model.addAttribute("validationRowNotes", report.rowNotes());
+            model.addAttribute("validationRowSourceSystems", report.rowSourceSystems());
 
             if (report.invalidRows() == 0) {
                 model.addAttribute("successMessage", "CSV upload received.");

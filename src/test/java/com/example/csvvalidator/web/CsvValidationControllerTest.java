@@ -19,6 +19,7 @@ import com.example.csvvalidator.validation.CsvValidationReport;
 import com.example.csvvalidator.validation.CsvValidationReportService;
 import com.example.csvvalidator.validation.CsvValidationRowError;
 import com.example.csvvalidator.validation.CsvValidationRowNote;
+import com.example.csvvalidator.validation.CsvValidationRowSourceSystem;
 import com.example.csvvalidator.validation.CsvStructureValidationResult;
 import com.example.csvvalidator.validation.CsvStructureValidationService;
 import org.junit.jupiter.api.Test;
@@ -71,7 +72,8 @@ class CsvValidationControllerTest {
                 .andExpect(content().string(containsString("CSV file")))
                 .andExpect(content().string(containsString("Submit")))
                 .andExpect(content().string(containsString("CSV upload received.")))
-                .andExpect(content().string(org.hamcrest.Matchers.not(containsString("Notes by row"))));
+                .andExpect(content().string(org.hamcrest.Matchers.not(containsString("Notes by row"))))
+                .andExpect(content().string(org.hamcrest.Matchers.not(containsString("Source system by row"))));
     }
 
     @Test
@@ -235,6 +237,34 @@ class CsvValidationControllerTest {
                         List.of(new CsvValidationRowNote(1, "Follow up required"))))
                 .andExpect(content().string(containsString("Notes by row")))
                 .andExpect(content().string(containsString("Follow up required")));
+    }
+
+    @Test
+    void rendersSourceSystemByRowWhenTheReportContainsSourceSystems() throws Exception {
+        when(csvStructureValidationService.validate(any(InputStream.class)))
+                .thenReturn(CsvStructureValidationResult.ok());
+        when(csvValidationReportService.createReport(any(InputStream.class)))
+                .thenReturn(new CsvValidationReport(
+                        1,
+                        1,
+                        0,
+                        Collections.emptyList(),
+                        Collections.emptyList(),
+                        List.of(new CsvValidationRowSourceSystem(1, "legacy-import"))));
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "providers.csv",
+                MediaType.TEXT_PLAIN_VALUE,
+                "provider_id,provider_name,effective_date,source_system\nP-100,North Clinic,2025-01-31,legacy-import"
+                        .getBytes(StandardCharsets.UTF_8));
+
+        mockMvc.perform(multipart("/validate").file(file))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("validationRowSourceSystems",
+                        List.of(new CsvValidationRowSourceSystem(1, "legacy-import"))))
+                .andExpect(content().string(containsString("Source system by row")))
+                .andExpect(content().string(containsString("legacy-import")));
     }
 
     @Test

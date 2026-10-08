@@ -44,6 +44,24 @@
                 </tbody>
             </table>
         </section>
+
+        <section th:if="${validationRowSourceSystems != null and !#lists.isEmpty(validationRowSourceSystems)}">
+            <h3>Source system by row</h3>
+            <table>
+                <thead>
+                <tr>
+                    <th>Row</th>
+                    <th>Source system</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="rowSourceSystem : ${validationRowSourceSystems}">
+                    <td th:text="${rowSourceSystem.rowNumber}"></td>
+                    <td th:text="${rowSourceSystem.sourceSystem}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
     </section>
     <p th:if="${successMessage}" th:text="${successMessage}" role="status"></p>
 </main>

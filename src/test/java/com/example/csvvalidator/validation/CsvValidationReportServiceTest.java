@@ -69,6 +69,7 @@ class CsvValidationReportServiceTest {
         assertEquals(0, report.invalidRows());
         assertTrue(report.rowErrors().isEmpty());
         assertTrue(report.rowNotes().isEmpty());
+        assertTrue(report.rowSourceSystems().isEmpty());
     }
 
     @Test
@@ -101,6 +102,36 @@ class CsvValidationReportServiceTest {
         assertEquals(List.of(
                 new CsvValidationRowNote(1, ""),
                 new CsvValidationRowNote(2, "   ")), report.rowNotes());
+    }
+
+    @Test
+    void includesSourceSystemForEveryRowWithoutChangingValidationResults() throws Exception {
+        CsvValidationReport report = createReport("""
+                provider_id,provider_name,effective_date,source_system
+                P-100,North Clinic,2025-01-31,legacy-import
+                ,South Clinic,2025-02-28,partner-feed
+                """);
+
+        assertEquals(2, report.totalRows());
+        assertEquals(1, report.validRows());
+        assertEquals(1, report.invalidRows());
+        assertEquals(List.of(
+                new CsvValidationRowSourceSystem(1, "legacy-import"),
+                new CsvValidationRowSourceSystem(2, "partner-feed")), report.rowSourceSystems());
+    }
+
+    @Test
+    void acceptsEmptyAndWhitespaceOnlySourceSystems() throws Exception {
+        CsvValidationReport report = createReport(
+                "provider_id,provider_name,effective_date,source_system\n"
+                        + "P-100,North Clinic,2025-01-31,\n"
+                        + "P-101,South Clinic,2025-02-28,   \n");
+
+        assertEquals(2, report.validRows());
+        assertEquals(0, report.invalidRows());
+        assertEquals(List.of(
+                new CsvValidationRowSourceSystem(1, ""),
+                new CsvValidationRowSourceSystem(2, "   ")), report.rowSourceSystems());
     }
 
     private CsvValidationReport createReport(String csv) throws Exception {
