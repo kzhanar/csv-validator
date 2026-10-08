@@ -68,6 +68,39 @@ class CsvValidationReportServiceTest {
         assertEquals(report.totalRows(), report.validRows() + report.invalidRows());
         assertEquals(0, report.invalidRows());
         assertTrue(report.rowErrors().isEmpty());
+        assertTrue(report.rowNotes().isEmpty());
+    }
+
+    @Test
+    void includesNotesForEveryRowWithoutChangingValidationResults() throws Exception {
+        CsvValidationReport report = createReport("""
+                provider_id,provider_name,effective_date,notes
+                P-100,North Clinic,2025-01-31,ready
+                ,South Clinic,2025-02-28,needs review
+                """);
+
+        assertEquals(2, report.totalRows());
+        assertEquals(1, report.validRows());
+        assertEquals(1, report.invalidRows());
+        assertEquals(1, report.rowErrors().size());
+        assertEquals(2, report.rowErrors().get(0).rowNumber());
+        assertEquals(List.of(
+                new CsvValidationRowNote(1, "ready"),
+                new CsvValidationRowNote(2, "needs review")), report.rowNotes());
+    }
+
+    @Test
+    void acceptsEmptyAndWhitespaceOnlyNotes() throws Exception {
+        CsvValidationReport report = createReport(
+                "provider_id,provider_name,effective_date,notes\n"
+                        + "P-100,North Clinic,2025-01-31,\n"
+                        + "P-101,South Clinic,2025-02-28,   \n");
+
+        assertEquals(2, report.validRows());
+        assertEquals(0, report.invalidRows());
+        assertEquals(List.of(
+                new CsvValidationRowNote(1, ""),
+                new CsvValidationRowNote(2, "   ")), report.rowNotes());
     }
 
     private CsvValidationReport createReport(String csv) throws Exception {

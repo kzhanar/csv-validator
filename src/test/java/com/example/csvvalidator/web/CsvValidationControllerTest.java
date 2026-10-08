@@ -18,6 +18,7 @@ import java.util.List;
 import com.example.csvvalidator.validation.CsvValidationReport;
 import com.example.csvvalidator.validation.CsvValidationReportService;
 import com.example.csvvalidator.validation.CsvValidationRowError;
+import com.example.csvvalidator.validation.CsvValidationRowNote;
 import com.example.csvvalidator.validation.CsvStructureValidationResult;
 import com.example.csvvalidator.validation.CsvStructureValidationService;
 import org.junit.jupiter.api.Test;
@@ -69,7 +70,8 @@ class CsvValidationControllerTest {
                 .andExpect(content().string(containsString("Invalid rows: 0")))
                 .andExpect(content().string(containsString("CSV file")))
                 .andExpect(content().string(containsString("Submit")))
-                .andExpect(content().string(containsString("CSV upload received.")));
+                .andExpect(content().string(containsString("CSV upload received.")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(containsString("Notes by row"))));
     }
 
     @Test
@@ -206,6 +208,33 @@ class CsvValidationControllerTest {
                 .andExpect(model().attribute("validRows", 2))
                 .andExpect(model().attribute("invalidRows", 0))
                 .andExpect(model().attribute("validationRowErrors", Collections.emptyList()));
+    }
+
+    @Test
+    void rendersNotesByRowWhenTheReportContainsNotes() throws Exception {
+        when(csvStructureValidationService.validate(any(InputStream.class)))
+                .thenReturn(CsvStructureValidationResult.ok());
+        when(csvValidationReportService.createReport(any(InputStream.class)))
+                .thenReturn(new CsvValidationReport(
+                        1,
+                        1,
+                        0,
+                        Collections.emptyList(),
+                        List.of(new CsvValidationRowNote(1, "Follow up required"))));
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "providers.csv",
+                MediaType.TEXT_PLAIN_VALUE,
+                "provider_id,provider_name,effective_date,notes\nP-100,North Clinic,2025-01-31,Follow up required"
+                        .getBytes(StandardCharsets.UTF_8));
+
+        mockMvc.perform(multipart("/validate").file(file))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("validationRowNotes",
+                        List.of(new CsvValidationRowNote(1, "Follow up required"))))
+                .andExpect(content().string(containsString("Notes by row")))
+                .andExpect(content().string(containsString("Follow up required")));
     }
 
     @Test
