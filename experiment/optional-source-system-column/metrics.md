@@ -9,7 +9,7 @@ they are not estimates.
 | Configured methodology | Workspace-local Superpowers; bounded design approval followed by test-first implementation | `.github/copilot-instructions.md`; first-run session `events.jsonl` (`skill.invoked` and message events) |
 | Baseline commit | `9368d1754179668829bb82eb7e382521f0421ed1` (`2026-10-08T13:13:01-04:00`) | `git show -s 9368d17`; session-start Git metadata |
 | Baseline worktree | Clean at session start | First-run session `events.jsonl` / captured `git status --short` |
-| Time before first code change | **00:03:12.544 — Reconstructed from session timestamps** (session start `17:13:37.056Z`; first recorded file edit `17:16:49.600Z`) | First-run `C:\Users\koi8\.copilot\session-state\0a74d031-d7cc-4fc0-a32c-b52b0ce799db\events.jsonl` (`session.start`, first `tool.execution_complete` with `fileEdits`) |
+| Time before first code change | **00:03:12.544 — Reconstructed from session timestamps** (session start `17:13:37.056Z`; first recorded file edit `17:16:49.600Z`) | Saved first-run Copilot session export, `events.jsonl` (`session.start`, first `tool.execution_complete` with `fileEdits`) |
 | Total elapsed session time | **00:11:12.468 — Reconstructed from session timestamps** (session start `17:13:37.056Z` to final assistant message `17:24:49.524Z`, before the later metrics-recovery request) | Same first-run `events.jsonl` (`session.start`, final `assistant.message`) |
 | AI interaction count | **48 assistant turn pairs — Reconstructed from session records** (`assistant.turn_start` = 48; `assistant.turn_end` = 48). This is an event count, not a claim of 48 premium/API requests. | First-run `events.jsonl`, filtered to before the later metrics-recovery user message |
 | Assistant message events | 75 — event records, not a count of unique user-facing responses | Same first-run `events.jsonl`, `assistant.message` events before the later request |
@@ -40,10 +40,9 @@ they are not estimates.
 
 ## Evidence notes
 
-- The session event export is
-  `C:\Users\koi8\.copilot\session-state\0a74d031-d7cc-4fc0-a32c-b52b0ce799db\events.jsonl`.
-  The interaction/timing rows are limited to events before the later metrics
-  recovery request.
+- The interaction/timing rows are based on the saved first-run Copilot session
+  event export (`events.jsonl`) and are limited to events before the later
+  metrics recovery request.
 - Final Surefire text reports are under `target/surefire-reports`. The older
   `CsvValidationIntegrationTest.txt` is kept distinct from reports refreshed by
   the final `mvn test` invocation; its passing tests are not added to that
