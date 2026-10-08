@@ -19,6 +19,14 @@ Required columns:
 - provider_name
 - effective_date
 
+Optional columns:
+
+- source_system
+
+When present, `source_system` is displayed for every data row in the validation
+report. Empty and whitespace-only values are valid, and this column does not
+affect row validity.
+
 ## Validation Rules
 
 1. provider_id is required.

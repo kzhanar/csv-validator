@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class CsvValidationReportService {
 
+    private static final String SOURCE_SYSTEM_HEADER = "source_system";
+
     private final CsvRequiredValueValidationService csvRequiredValueValidationService;
     private final CsvDateValidationService csvDateValidationService;
     private final CsvDuplicateProviderIdValidationService csvDuplicateProviderIdValidationService;
@@ -34,7 +36,8 @@ public class CsvValidationReportService {
     public CsvValidationReport createReport(InputStream csvInput) throws IOException {
         byte[] csvBytes = csvInput.readAllBytes();
 
-        int totalRows = countRows(csvBytes);
+        CsvRows csvRows = readRows(csvBytes);
+        int totalRows = csvRows.rows().size();
         Map<Integer, List<String>> rowReasons = new LinkedHashMap<>();
 
         List<RowMissingFieldError> missingFieldErrors =
@@ -62,21 +65,29 @@ public class CsvValidationReportService {
         int invalidRows = rowErrors.size();
         int validRows = totalRows - invalidRows;
 
-        return new CsvValidationReport(totalRows, validRows, invalidRows, rowErrors);
+        return new CsvValidationReport(totalRows, validRows, invalidRows, rowErrors,
+                csvRows.rows(), csvRows.sourceSystemPresent());
     }
 
-    private int countRows(byte[] csvBytes) throws IOException {
-        int count = 0;
+    private CsvRows readRows(byte[] csvBytes) throws IOException {
+        List<CsvValidationReportRow> rows = new ArrayList<>();
         try (Reader reader = new InputStreamReader(new ByteArrayInputStream(csvBytes), StandardCharsets.UTF_8);
              CSVParser parser = CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).build().parse(reader)) {
+            boolean sourceSystemPresent = parser.getHeaderMap().containsKey(SOURCE_SYSTEM_HEADER);
+            int rowNumber = 1;
             for (CSVRecord ignored : parser) {
-                count++;
+                String sourceSystem = sourceSystemPresent ? ignored.get(SOURCE_SYSTEM_HEADER) : null;
+                rows.add(new CsvValidationReportRow(rowNumber, sourceSystem));
+                rowNumber++;
             }
+            return new CsvRows(rows, sourceSystemPresent);
         }
-        return count;
     }
 
     private void addReason(Map<Integer, List<String>> rowReasons, int rowNumber, String reason) {
         rowReasons.computeIfAbsent(rowNumber, ignored -> new ArrayList<>()).add(reason);
+    }
+
+    private record CsvRows(List<CsvValidationReportRow> rows, boolean sourceSystemPresent) {
     }
 }

@@ -17,6 +17,7 @@ import java.util.List;
 
 import com.example.csvvalidator.validation.CsvValidationReport;
 import com.example.csvvalidator.validation.CsvValidationReportService;
+import com.example.csvvalidator.validation.CsvValidationReportRow;
 import com.example.csvvalidator.validation.CsvValidationRowError;
 import com.example.csvvalidator.validation.CsvStructureValidationResult;
 import com.example.csvvalidator.validation.CsvStructureValidationService;
@@ -64,12 +65,47 @@ class CsvValidationControllerTest {
                 .andExpect(model().attribute("validRows", 1))
                 .andExpect(model().attribute("invalidRows", 0))
                 .andExpect(model().attribute("successMessage", "CSV upload received."))
+                .andExpect(model().attributeDoesNotExist("sourceSystemRows"))
                 .andExpect(content().string(containsString("Total rows: 1")))
                 .andExpect(content().string(containsString("Valid rows: 1")))
                 .andExpect(content().string(containsString("Invalid rows: 0")))
                 .andExpect(content().string(containsString("CSV file")))
                 .andExpect(content().string(containsString("Submit")))
                 .andExpect(content().string(containsString("CSV upload received.")));
+    }
+
+    @Test
+    void displaysSourceSystemValuesForValidAndInvalidRowsWhenColumnIsPresent() throws Exception {
+        when(csvStructureValidationService.validate(any(InputStream.class)))
+                .thenReturn(CsvStructureValidationResult.ok());
+        when(csvValidationReportService.createReport(any(InputStream.class)))
+                .thenReturn(new CsvValidationReport(
+                        2,
+                        1,
+                        1,
+                        List.of(new CsvValidationRowError(2, List.of("missing provider_id"))),
+                        List.of(new CsvValidationReportRow(1, "legacy"),
+                                new CsvValidationReportRow(2, "migration")),
+                        true));
+
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "providers.csv",
+                MediaType.TEXT_PLAIN_VALUE,
+                ("provider_id,provider_name,effective_date,source_system\n"
+                        + "P-100,North Clinic,2025-01-31,legacy\n"
+                        + ",South Clinic,2025-02-28,migration").getBytes(StandardCharsets.UTF_8));
+
+        mockMvc.perform(multipart("/validate").file(file))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("sourceSystemPresent", true))
+                .andExpect(model().attribute("sourceSystemRows", List.of(
+                        new CsvValidationReportRow(1, "legacy"),
+                        new CsvValidationReportRow(2, "migration"))))
+                .andExpect(content().string(containsString("Source System Values")))
+                .andExpect(content().string(containsString("legacy")))
+                .andExpect(content().string(containsString("migration")))
+                .andExpect(content().string(containsString("Row 2: missing provider_id")));
     }
 
     @Test

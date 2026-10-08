@@ -21,6 +21,24 @@
         <p th:text="'Valid rows: ' + ${validRows}"></p>
         <p th:text="'Invalid rows: ' + ${invalidRows}"></p>
 
+        <section th:if="${sourceSystemPresent}">
+            <h3>Source System Values</h3>
+            <table>
+                <thead>
+                <tr>
+                    <th>Row</th>
+                    <th>source_system</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="sourceSystemRow : ${sourceSystemRows}">
+                    <td th:text="${sourceSystemRow.rowNumber}"></td>
+                    <td th:text="${sourceSystemRow.sourceSystem}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
+
         <h3 th:if="${validationRowErrors != null and !#lists.isEmpty(validationRowErrors)}">Row Errors</h3>
         <ul>
             <li th:each="rowError : ${validationRowErrors}"
