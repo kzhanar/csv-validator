@@ -71,6 +71,35 @@ class CsvValidationReportServiceTest {
         assertTrue(report.rowNotes().isEmpty());
     }
 
+    @Test
+    void reportsSourceSystemForEachRowWithoutAffectingValidity() throws Exception {
+        CsvValidationReport report = createReport("provider_id,provider_name,effective_date,source_system\n"
+                + "P-100,North Clinic,2025-01-31,legacy\n"
+                + "P-101,South Clinic,2025-02-28,   \n"
+                + "P-102,,2025-03-01,\n");
+
+        assertEquals(3, report.totalRows());
+        assertEquals(2, report.validRows());
+        assertEquals(1, report.invalidRows());
+        assertEquals(3, report.rowSourceSystems().size());
+        assertEquals(1, report.rowSourceSystems().get(0).rowNumber());
+        assertEquals("legacy", report.rowSourceSystems().get(0).sourceSystem());
+        assertEquals(2, report.rowSourceSystems().get(1).rowNumber());
+        assertEquals("   ", report.rowSourceSystems().get(1).sourceSystem());
+        assertEquals(3, report.rowSourceSystems().get(2).rowNumber());
+        assertEquals("", report.rowSourceSystems().get(2).sourceSystem());
+    }
+
+    @Test
+    void sourceSystemReportIsEmptyWhenColumnIsAbsent() throws Exception {
+        CsvValidationReport report = createReport("""
+                provider_id,provider_name,effective_date
+                P-100,North Clinic,2025-01-31
+                """);
+
+        assertTrue(report.rowSourceSystems().isEmpty());
+    }
+
     private CsvValidationReport createReport(String csv) throws Exception {
         return service.createReport(new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8)));
     }

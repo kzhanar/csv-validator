@@ -57,9 +57,41 @@ class CsvTransientProcessingTest {
                 .contains("Row 4: missing provider_id")
                 .contains("Notes by row")
                 .contains("review soon")
-                .contains("invalid row note");
+                .contains("invalid row note")
+                .doesNotContain("Source system by row");
         assertThat(report)
                 .containsPattern("(?s)<td>2</td>\\s*<td></td>")
                 .containsPattern("(?s)<td>3</td>\\s*<td>\\s{3}</td>");
+    }
+
+    @Test
+    void reportsSourceSystemForEveryRowWithoutChangingRowValidity() throws Exception {
+        String csv = "provider_id,provider_name,effective_date,source_system\n"
+                + "P-100,North Clinic,2025-01-31,legacy\n"
+                + "P-101,South Clinic,2025-02-28,   \n"
+                + "P-102,,2025-03-01,\n";
+        MockMultipartFile file = new MockMultipartFile(
+                "file",
+                "providers.csv",
+                MediaType.TEXT_PLAIN_VALUE,
+                csv.getBytes(StandardCharsets.UTF_8));
+
+        String report = mockMvc.perform(multipart("/validate").file(file))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        assertThat(report)
+                .contains("Total rows: 3")
+                .contains("Valid rows: 2")
+                .contains("Invalid rows: 1")
+                .contains("Row 3: missing provider_name")
+                .contains("Source system by row")
+                .contains("legacy");
+        assertThat(report)
+                .containsPattern("(?s)<td>1</td>\\s*<td>legacy</td>")
+                .containsPattern("(?s)<td>2</td>\\s*<td>\\s{3}</td>")
+                .containsPattern("(?s)<td>3</td>\\s*<td></td>");
     }
 }

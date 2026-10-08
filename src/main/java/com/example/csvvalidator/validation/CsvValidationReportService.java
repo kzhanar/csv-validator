@@ -36,6 +36,7 @@ public class CsvValidationReportService {
 
         int totalRows = countRows(csvBytes);
         List<CsvValidationRowNote> rowNotes = readRowNotes(csvBytes);
+        List<CsvValidationRowSourceSystem> rowSourceSystems = readRowSourceSystems(csvBytes);
         Map<Integer, List<String>> rowReasons = new LinkedHashMap<>();
 
         List<RowMissingFieldError> missingFieldErrors =
@@ -63,7 +64,7 @@ public class CsvValidationReportService {
         int invalidRows = rowErrors.size();
         int validRows = totalRows - invalidRows;
 
-        return new CsvValidationReport(totalRows, validRows, invalidRows, rowErrors, rowNotes);
+        return new CsvValidationReport(totalRows, validRows, invalidRows, rowErrors, rowNotes, rowSourceSystems);
     }
 
     private List<CsvValidationRowNote> readRowNotes(byte[] csvBytes) throws IOException {
@@ -83,6 +84,25 @@ public class CsvValidationReportService {
             }
         }
         return rowNotes;
+    }
+
+    private List<CsvValidationRowSourceSystem> readRowSourceSystems(byte[] csvBytes) throws IOException {
+        List<CsvValidationRowSourceSystem> rowSourceSystems = new ArrayList<>();
+        try (Reader reader = new InputStreamReader(new ByteArrayInputStream(csvBytes), StandardCharsets.UTF_8);
+             CSVParser parser = CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).build().parse(reader)) {
+            Map<String, Integer> headers = parser.getHeaderMap();
+            if (headers == null || !headers.containsKey("source_system")) {
+                return List.of();
+            }
+
+            int rowNumber = 1;
+            int sourceSystemColumn = headers.get("source_system");
+            for (CSVRecord record : parser) {
+                String sourceSystem = sourceSystemColumn < record.size() ? record.get(sourceSystemColumn) : "";
+                rowSourceSystems.add(new CsvValidationRowSourceSystem(rowNumber++, sourceSystem));
+            }
+        }
+        return rowSourceSystems;
     }
 
     private int countRows(byte[] csvBytes) throws IOException {
