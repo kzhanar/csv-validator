@@ -69,7 +69,8 @@ class CsvValidationControllerTest {
                 .andExpect(content().string(containsString("Invalid rows: 0")))
                 .andExpect(content().string(containsString("CSV file")))
                 .andExpect(content().string(containsString("Submit")))
-                .andExpect(content().string(containsString("CSV upload received.")));
+                .andExpect(content().string(containsString("CSV upload received.")))
+                .andExpect(content().string(org.hamcrest.Matchers.not(containsString("Notes by row"))));
     }
 
     @Test

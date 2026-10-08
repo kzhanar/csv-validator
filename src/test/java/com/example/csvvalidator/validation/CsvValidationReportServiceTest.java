@@ -68,6 +68,7 @@ class CsvValidationReportServiceTest {
         assertEquals(report.totalRows(), report.validRows() + report.invalidRows());
         assertEquals(0, report.invalidRows());
         assertTrue(report.rowErrors().isEmpty());
+        assertTrue(report.rowNotes().isEmpty());
     }
 
     private CsvValidationReport createReport(String csv) throws Exception {

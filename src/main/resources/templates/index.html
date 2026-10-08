@@ -26,6 +26,24 @@
             <li th:each="rowError : ${validationRowErrors}"
                 th:text="'Row ' + ${rowError.rowNumber} + ': ' + ${#strings.listJoin(rowError.reasons, '; ')}"></li>
         </ul>
+
+        <section th:if="${validationRowNotes != null and !#lists.isEmpty(validationRowNotes)}">
+            <h3>Notes by row</h3>
+            <table>
+                <thead>
+                <tr>
+                    <th>Row</th>
+                    <th>Notes</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="rowNote : ${validationRowNotes}">
+                    <td th:text="${rowNote.rowNumber}"></td>
+                    <td th:text="${rowNote.notes}"></td>
+                </tr>
+                </tbody>
+            </table>
+        </section>
     </section>
     <p th:if="${successMessage}" th:text="${successMessage}" role="status"></p>
 </main>

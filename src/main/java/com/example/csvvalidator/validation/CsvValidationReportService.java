@@ -35,6 +35,7 @@ public class CsvValidationReportService {
         byte[] csvBytes = csvInput.readAllBytes();
 
         int totalRows = countRows(csvBytes);
+        List<CsvValidationRowNote> rowNotes = readRowNotes(csvBytes);
         Map<Integer, List<String>> rowReasons = new LinkedHashMap<>();
 
         List<RowMissingFieldError> missingFieldErrors =
@@ -62,7 +63,26 @@ public class CsvValidationReportService {
         int invalidRows = rowErrors.size();
         int validRows = totalRows - invalidRows;
 
-        return new CsvValidationReport(totalRows, validRows, invalidRows, rowErrors);
+        return new CsvValidationReport(totalRows, validRows, invalidRows, rowErrors, rowNotes);
+    }
+
+    private List<CsvValidationRowNote> readRowNotes(byte[] csvBytes) throws IOException {
+        List<CsvValidationRowNote> rowNotes = new ArrayList<>();
+        try (Reader reader = new InputStreamReader(new ByteArrayInputStream(csvBytes), StandardCharsets.UTF_8);
+             CSVParser parser = CSVFormat.DEFAULT.builder().setHeader().setSkipHeaderRecord(true).build().parse(reader)) {
+            Map<String, Integer> headers = parser.getHeaderMap();
+            if (headers == null || !headers.containsKey("notes")) {
+                return List.of();
+            }
+
+            int rowNumber = 1;
+            int notesColumn = headers.get("notes");
+            for (CSVRecord record : parser) {
+                String notes = notesColumn < record.size() ? record.get(notesColumn) : "";
+                rowNotes.add(new CsvValidationRowNote(rowNumber++, notes));
+            }
+        }
+        return rowNotes;
     }
 
     private int countRows(byte[] csvBytes) throws IOException {
