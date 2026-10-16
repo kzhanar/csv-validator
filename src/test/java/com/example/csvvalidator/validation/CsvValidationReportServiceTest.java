@@ -57,6 +57,22 @@ class CsvValidationReportServiceTest {
         assertEquals(List.of("invalid effective_date (YYYY-MM-DD required).", "duplicate provider_id."), rowTwo.reasons());
     }
 
+        @Test
+        void missingNameAndInvalidDateAreReportedTogetherOnOneRow() throws Exception {
+                CsvValidationReport report = createReport("""
+                                provider_id,provider_name,effective_date
+                                P-100,   ,2025-02-30
+                                """);
+
+                assertEquals(1, report.totalRows());
+                assertEquals(0, report.validRows());
+                assertEquals(1, report.invalidRows());
+                assertEquals(1, report.rowErrors().size());
+                assertEquals(1, report.rowErrors().get(0).rowNumber());
+                assertEquals(List.of("missing provider_name", "invalid effective_date (YYYY-MM-DD required)."),
+                                report.rowErrors().get(0).reasons());
+        }
+
     @Test
     void totalsAlwaysEqualValidPlusInvalidAndAllValidHasNoRowErrors() throws Exception {
         CsvValidationReport report = createReport("""
